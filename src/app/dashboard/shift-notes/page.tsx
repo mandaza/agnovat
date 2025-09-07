@@ -62,7 +62,7 @@ export default function ShiftNotesPage() {
                   <CardContent>
                     <div className="text-2xl font-bold">{analytics?.today || 0}</div>
                     <p className="text-xs text-muted-foreground">
-                      Today's shift notes
+                      Today&apos;s shift notes
                     </p>
                   </CardContent>
                 </Card>

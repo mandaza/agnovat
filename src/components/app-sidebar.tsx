@@ -39,7 +39,7 @@ import { Roles } from "../../types/globals"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { userId, sessionClaims } = useAuth()
-  const userRole = (sessionClaims?.metadata as any)?.role as Roles
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role as Roles
   const isAdmin = userRole === 'admin'
 
   // Role-based navigation items

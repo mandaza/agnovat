@@ -80,17 +80,17 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
   const createSchedule = async (scheduleData: CreateActivityScheduleData) => {
     try {
       const result = await createScheduleMutation({
-        activityId: scheduleData.activityId as unknown as any,
-        goalId: scheduleData.goalId as unknown as any,
+        activityId: scheduleData.activityId,
+        goalId: scheduleData.goalId,
         clientId: scheduleData.clientId,
         scheduledDate: scheduleData.scheduledDate,
         scheduledStartTime: scheduleData.scheduledStartTime,
         scheduledEndTime: scheduleData.scheduledEndTime,
-        assignedTo: scheduleData.assignedTo as unknown as any,
+        assignedTo: scheduleData.assignedTo,
         priority: scheduleData.priority,
         notes: scheduleData.notes,
         recurringPattern: scheduleData.recurringPattern,
-        createdBy: scheduleData.createdBy as unknown as any,
+        createdBy: scheduleData.createdBy,
       })
       return result
     } catch (error) {
@@ -103,7 +103,7 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
   const updateSchedule = async (scheduleId: string, updates: UpdateActivityScheduleData) => {
     try {
       // Filter out undefined values
-      const filteredUpdates: Record<string, any> = {}
+      const filteredUpdates: Partial<UpdateActivityScheduleData> = {}
       
       if (updates.scheduledDate !== undefined) filteredUpdates.scheduledDate = updates.scheduledDate
       if (updates.scheduledStartTime !== undefined) filteredUpdates.scheduledStartTime = updates.scheduledStartTime
@@ -114,11 +114,11 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
       
       // Handle assignedTo - only include if it's a valid value
       if (updates.assignedTo && typeof updates.assignedTo === 'string') {
-        filteredUpdates.assignedTo = updates.assignedTo as unknown as any
+        filteredUpdates.assignedTo = updates.assignedTo
       }
 
       const result = await updateScheduleMutation({
-        scheduleId: scheduleId as unknown as any,
+        scheduleId: scheduleId,
         updates: filteredUpdates,
       })
       return result
@@ -132,11 +132,11 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
   const rescheduleActivity = async (scheduleId: string, rescheduleData: RescheduleActivityData) => {
     try {
       const result = await rescheduleMutation({
-        originalScheduleId: scheduleId as unknown as any,
+        originalScheduleId: scheduleId ,
         newScheduledDate: rescheduleData.newScheduledDate,
         newScheduledStartTime: rescheduleData.newScheduledStartTime,
         newScheduledEndTime: rescheduleData.newScheduledEndTime,
-        newAssignedTo: rescheduleData.newAssignedTo as unknown as any,
+        newAssignedTo: rescheduleData.newAssignedTo ,
         rescheduleReason: rescheduleData.rescheduleReason,
       })
       return result
@@ -150,7 +150,7 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
   const cancelSchedule = async (scheduleId: string, cancellationReason?: string) => {
     try {
       const result = await cancelScheduleMutation({
-        scheduleId: scheduleId as unknown as any,
+        scheduleId: scheduleId ,
         cancellationReason,
       })
       return result
@@ -267,7 +267,7 @@ export function useActivitiesRealtime(filters: { goalId?: string; frequency?: st
   }) => {
     try {
       const result = await createActivityMutation({
-        goalId: activityData.goalId as unknown as any,
+        goalId: activityData.goalId ,
         title: activityData.title,
         description: activityData.description,
         frequency: activityData.frequency,
@@ -295,9 +295,9 @@ export function useActivitiesRealtime(filters: { goalId?: string; frequency?: st
   }) => {
     try {
       const result = await updateActivityMutation({
-        activityId: activityId as unknown as any,
+        activityId: activityId ,
         updates: {
-          goalId: updates.goalId as unknown as any,
+          goalId: updates.goalId ,
           title: updates.title,
           description: updates.description,
           frequency: updates.frequency,
@@ -318,7 +318,7 @@ export function useActivitiesRealtime(filters: { goalId?: string; frequency?: st
   const deleteActivity = async (activityId: string) => {
     try {
       const result = await deleteActivityMutation({
-        activityId: activityId as unknown as any,
+        activityId: activityId ,
       })
       return result
     } catch (error) {
@@ -331,7 +331,7 @@ export function useActivitiesRealtime(filters: { goalId?: string; frequency?: st
   const deactivateActivity = async (activityId: string) => {
     try {
       const result = await deactivateActivityMutation({
-        activityId: activityId as unknown as any,
+        activityId: activityId ,
       })
       return result
     } catch (error) {

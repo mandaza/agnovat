@@ -50,7 +50,7 @@ export function useClientsRealtime() {
   const updateClient = async (clientId: string, updates: UpdateClientData): Promise<Client> => {
     try {
       const result = await updateClientMutation({
-        clientId: clientId as unknown as any, // Convex will validate the ID format
+        clientId: clientId, // Convex will validate the ID format
         ...updates,
       })
       return result
@@ -64,7 +64,7 @@ export function useClientsRealtime() {
   const deleteClient = async (clientId: string): Promise<void> => {
     try {
       await deleteClientMutation({
-        clientId: clientId as unknown as any, // Convex will validate the ID format
+        clientId: clientId, // Convex will validate the ID format
       })
     } catch (error) {
       console.error('Error deleting client:', error)

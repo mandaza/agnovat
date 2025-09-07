@@ -18,8 +18,9 @@ export default clerkMiddleware(async (auth, req) => {
     }
 
     // Check if user is approved
-    const approvalStatus = (sessionClaims?.metadata as any)?.approvalStatus
-    const role = (sessionClaims?.metadata as any)?.role
+    const metadata = sessionClaims?.metadata as { approvalStatus?: string; role?: string }
+    const approvalStatus = metadata?.approvalStatus
+    const role = metadata?.role
 
     // If user is not approved and not already on approval page, redirect to approval pending
     if (approvalStatus !== 'approved' && !isApprovalRoute(req)) {

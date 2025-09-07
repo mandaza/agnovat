@@ -493,7 +493,7 @@ export function ClientsTable({ onClientUpdated }: ClientsTableProps) {
           <DialogHeader>
             <DialogTitle>Delete Client</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{deletingClient?.name}"? This action cannot be undone and will remove all associated data.
+              Are you sure you want to delete &quot;{deletingClient?.name}&quot;? This action cannot be undone and will remove all associated data.
             </DialogDescription>
           </DialogHeader>
           

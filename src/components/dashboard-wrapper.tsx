@@ -23,7 +23,7 @@ export function DashboardWrapper({ children }: DashboardWrapperProps) {
       return
     }
 
-    const metadata = sessionClaims?.metadata as any
+    const metadata = sessionClaims?.metadata as { approvalStatus?: string; role?: string }
     const approvalStatus = metadata?.approvalStatus
     const role = metadata?.role
 

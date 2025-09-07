@@ -3,7 +3,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -20,8 +19,6 @@ import {
   Clock, 
   CheckCircle, 
   XCircle, 
-  Search,
-  Filter,
   RefreshCw,
   Activity,
   Settings,
@@ -46,13 +43,11 @@ export default function AdminDashboard() {
   
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([])
   const [selectedUsers, setSelectedUsers] = useState<UserProfile[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<ApprovalStatus | 'all'>('all')
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('users')
 
   // Check if current user is admin
-  const isAdmin = (sessionClaims?.metadata as any)?.role === 'admin'
+  const isAdmin = (sessionClaims?.metadata as { role?: string })?.role === 'admin'
 
   useEffect(() => {
     if (!isAdmin) {
@@ -71,9 +66,9 @@ export default function AdminDashboard() {
   const handleApprove = async (userId: string) => {
     setIsLoading(true)
     try {
-      const currentUser = sessionClaims?.metadata as any
+      const currentUser = sessionClaims?.metadata as { email?: string }
       await updateUser({
-        userId: userId as any,
+        userId: userId as string,
         updates: {
           approvalStatus: 'approved',
           approvedBy: currentUser?.email || userId,
@@ -90,9 +85,9 @@ export default function AdminDashboard() {
   const handleReject = async (userId: string) => {
     setIsLoading(true)
     try {
-      const currentUser = sessionClaims?.metadata as any
+      const currentUser = sessionClaims?.metadata as { email?: string }
       await updateUser({
-        userId: userId as any,
+        userId: userId as string,
         updates: {
           approvalStatus: 'rejected',
           approvedBy: currentUser?.email || userId
@@ -109,7 +104,7 @@ export default function AdminDashboard() {
     setIsLoading(true)
     try {
       await updateUser({
-        userId: userId as any,
+        userId: userId as string,
         updates: { role: newRole }
       })
     } catch (error) {
@@ -122,8 +117,8 @@ export default function AdminDashboard() {
   const handleBulkUpdate = async (userIds: string[], updates: Partial<UserProfile>) => {
     setIsLoading(true)
     try {
-      const currentUser = sessionClaims?.metadata as any
-      const bulkUpdates: any = {}
+      const currentUser = sessionClaims?.metadata as { email?: string }
+      const bulkUpdates: Partial<UserProfile> = {}
       
       if (updates.approvalStatus) bulkUpdates.approvalStatus = updates.approvalStatus
       if (updates.role) bulkUpdates.role = updates.role
@@ -132,7 +127,7 @@ export default function AdminDashboard() {
       }
       
       await bulkUpdateUsers({
-        userIds: userIds as any[],
+        userIds: userIds as string[],
         updates: bulkUpdates
       })
       
@@ -147,7 +142,7 @@ export default function AdminDashboard() {
   const handleUserProfileUpdate = async (updatedUser: UserProfile) => {
     try {
       await updateUser({
-        userId: updatedUser._id as any,
+        userId: updatedUser._id as string,
         updates: {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
@@ -170,7 +165,14 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleFiltersChange = (filters: any) => {
+  const handleFiltersChange = (filters: {
+    searchTerm?: string;
+    roles?: Roles[];
+    approvalStatuses?: ApprovalStatus[];
+    performanceRating: { min: number | null; max: number | null };
+    clientAssignments?: boolean | null;
+    certifications?: string[];
+  }) => {
     let filtered = allUsers || []
     
     // Apply search term filter
@@ -254,24 +256,24 @@ export default function AdminDashboard() {
     }
   }
 
-  const getRoleBadge = (role: Roles | null) => {
-    if (!role) return <Badge variant="outline">No Role</Badge>
-    
-    const roleColors = {
-      admin: 'bg-red-100 text-red-800',
-      public_guardian: 'bg-blue-100 text-blue-800',
-      support_coordinator: 'bg-green-100 text-green-800',
-      support_worker: 'bg-purple-100 text-purple-800',
-      behavior_practitioner: 'bg-orange-100 text-orange-800',
-      family: 'bg-pink-100 text-pink-800'
-    }
-    
-    return (
-      <Badge className={roleColors[role]}>
-        {role.replace('_', ' ').toUpperCase()}
-      </Badge>
-    )
-  }
+  // const getRoleBadge = (role: Roles | null) => {
+  //   if (!role) return <Badge variant="outline">No Role</Badge>
+  //   
+  //   const roleColors = {
+  //     admin: 'bg-red-100 text-red-800',
+  //     public_guardian: 'bg-blue-100 text-blue-800',
+  //     support_coordinator: 'bg-green-100 text-green-800',
+  //     support_worker: 'bg-purple-100 text-purple-800',
+  //     behavior_practitioner: 'bg-orange-100 text-orange-800',
+  //     family: 'bg-pink-100 text-pink-800'
+  //   }
+  //   
+  //   return (
+  //     <Badge className={roleColors[role]}>
+  //       {role.replace('_', ' ').toUpperCase()}
+  //     </Badge>
+  //   )
+  // }
 
   if (!isAdmin) {
     return (
@@ -279,7 +281,7 @@ export default function AdminDashboard() {
         <div className="text-center">
           <Shield className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-600">Access Denied</h2>
-          <p className="text-gray-500">You don't have permission to view this page.</p>
+          <p className="text-gray-500">You don&apos;t have permission to view this page.</p>
         </div>
       </div>
     )

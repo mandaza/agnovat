@@ -158,7 +158,7 @@ export function EnhancedShiftNotesForm({
         }
       })
       .sort((a, b) => a.scheduledStartTime - b.scheduledStartTime)
-  }, [selectedDate, clientId, schedules, activities, goals, getSchedulesForDate])
+  }, [selectedDate, clientId, activities, goals, getSchedulesForDate])
 
   // Get additional activities (not scheduled for today)
   const additionalActivities = useMemo(() => {

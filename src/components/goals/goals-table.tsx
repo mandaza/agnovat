@@ -503,7 +503,7 @@ export function GoalsTable({ onGoalUpdated }: GoalsTableProps) {
           <DialogHeader>
             <DialogTitle>Delete Goal</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{deletingGoal?.title}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{deletingGoal?.title}&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           

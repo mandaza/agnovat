@@ -68,7 +68,7 @@ export function useGoalsRealtime() {
   const updateGoal = async (goalId: string, updates: UpdateGoalData) => {
     try {
       // Filter out undefined values and handle assignedTo properly
-      const filteredUpdates: Record<string, any> = {}
+      const filteredUpdates: Partial<UpdateGoalData> = {}
       
       if (updates.title !== undefined) filteredUpdates.title = updates.title
       if (updates.description !== undefined) filteredUpdates.description = updates.description
@@ -82,12 +82,12 @@ export function useGoalsRealtime() {
       if (updates.assignedTo !== undefined && updates.assignedTo !== null && updates.assignedTo !== '') {
         // Only include if it looks like a valid Convex ID
         if (typeof updates.assignedTo === 'string' && /^[a-z][a-z0-9]*$/i.test(updates.assignedTo)) {
-          filteredUpdates.assignedTo = updates.assignedTo as unknown as any
+          filteredUpdates.assignedTo = updates.assignedTo
         }
       }
 
       const result = await updateGoalMutation({
-        goalId: goalId as unknown as any, // Convex will validate the ID format
+        goalId: goalId, // Convex will validate the ID format
         updates: filteredUpdates,
       })
       return result
@@ -101,7 +101,7 @@ export function useGoalsRealtime() {
   const deleteGoal = async (goalId: string) => {
     try {
       await deleteGoalMutation({
-        goalId: goalId as unknown as any, // Convex will validate the ID format
+        goalId: goalId, // Convex will validate the ID format
       })
     } catch (error) {
       console.error('Error deleting goal:', error)

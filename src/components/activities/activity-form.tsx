@@ -140,9 +140,10 @@ export function ActivityForm({
       
       onClose?.()
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to save activity:', error)
-      alert(`Failed to ${isEditMode ? 'update' : 'create'} activity: ${error.message || 'Unknown error'}`)
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Failed to ${isEditMode ? 'update' : 'create'} activity: ${message}`)
     } finally {
       setIsSubmitting(false)
     }

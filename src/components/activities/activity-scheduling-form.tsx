@@ -167,16 +167,18 @@ export function ActivitySchedulingForm({
       onScheduleCreated?.(scheduleId)
       onClose?.()
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to create schedule:', error)
       
       // Handle specific error types
-      if (error.message?.includes('conflict')) {
+      const message = error instanceof Error ? error.message : ''
+      if (message.includes('conflict')) {
         form.setError("scheduledStartTime", {
           message: "Schedule conflict detected. Please choose a different time."
         })
       } else {
-        alert(`Failed to create schedule: ${error.message || 'Unknown error'}`)
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        alert(`Failed to create schedule: ${errorMessage}`)
       }
     } finally {
       setIsSubmitting(false)

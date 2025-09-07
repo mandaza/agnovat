@@ -120,16 +120,18 @@ export function ActivitiesList({
       await deleteActivity(activityId)
       setIsDeleteDialogOpen(false)
       setDeletingActivity(null)
-    } catch (error: any) {
-      alert(`Failed to delete activity: ${error.message}`)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Failed to delete activity: ${message}`)
     }
   }
 
   const handleDeactivate = async (activityId: string) => {
     try {
       await deactivateActivity(activityId)
-    } catch (error: any) {
-      alert(`Failed to deactivate activity: ${error.message}`)
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Failed to deactivate activity: ${message}`)
     }
   }
 
@@ -452,7 +454,7 @@ export function ActivitiesList({
           {deletingActivity && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Are you sure you want to delete "{deletingActivity.title}"? This action cannot be undone.
+                Are you sure you want to delete &quot;{deletingActivity.title}&quot;? This action cannot be undone.
                 Consider deactivating instead to preserve historical data.
               </p>
               

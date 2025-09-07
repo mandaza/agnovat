@@ -46,7 +46,7 @@ export default function ApprovalPendingPage() {
               <div>
                 <p className="font-medium text-gray-900">What Happens Next?</p>
                 <p className="text-sm text-gray-600">
-                  You'll receive an email notification once your account is approved
+                  You&apos;ll receive an email notification once your account is approved
                 </p>
               </div>
             </div>

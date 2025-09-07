@@ -34,7 +34,7 @@ export function RoleGuard({
       return
     }
 
-    const metadata = sessionClaims?.metadata as any
+    const metadata = sessionClaims?.metadata as { approvalStatus?: string; role?: string }
     const approvalStatus = metadata?.approvalStatus as ApprovalStatus
     const userRole = metadata?.role as Roles
 
@@ -89,7 +89,7 @@ export function RoleGuard({
     return null // Will redirect to sign-in
   }
 
-  const metadata = sessionClaims?.metadata as any
+  const metadata = sessionClaims?.metadata as { approvalStatus?: string; role?: string }
   const approvalStatus = metadata?.approvalStatus as ApprovalStatus
   const userRole = metadata?.role as Roles
 
@@ -158,7 +158,7 @@ export function RoleGuard({
                 Access Denied
               </CardTitle>
               <CardDescription className="text-gray-600">
-                You don't have permission to access this feature
+                You don&apos;t have permission to access this feature
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

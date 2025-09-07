@@ -105,7 +105,7 @@ export function ActivityCalendarView({ onEditSchedule, onSelectSchedule }: Activ
       end: new Date(schedule.scheduledEndTime),
       resource: schedule,
     }))
-  }, [filteredSchedules, activities])
+  }, [filteredSchedules, getActivityTitle])
 
   // Get unique clients and workers for filtering
   const uniqueClients = useMemo(() => {
