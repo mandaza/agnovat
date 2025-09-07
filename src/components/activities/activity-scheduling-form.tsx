@@ -33,7 +33,7 @@ import { useActivitySchedulesRealtime, useActivitiesRealtime } from "@/hooks/use
 import { useGoalsRealtime } from "@/hooks/use-goals-realtime"
 import { useClientsRealtime } from "@/hooks/use-clients-realtime"
 import { useUsersRealtime } from "@/hooks/use-users-realtime"
-import { CreateActivityScheduleData, SchedulePriority, RecurringFrequency } from "../../types/database"
+// import { CreateActivityScheduleData, SchedulePriority, RecurringFrequency } from "../../types/database"
 
 const scheduleFormSchema = z.object({
   activityId: z.string().min(1, "Please select an activity"),
@@ -140,7 +140,7 @@ export function ActivitySchedulingForm({
         return
       }
 
-      const scheduleData: CreateActivityScheduleData = {
+      const scheduleData: any = {
         activityId: data.activityId,
         goalId: data.goalId,
         clientId: data.clientId,
@@ -431,7 +431,7 @@ export function ActivitySchedulingForm({
                 <Checkbox
                   id="recurring"
                   checked={isRecurring}
-                  onCheckedChange={setIsRecurring}
+                  onCheckedChange={(checked) => setIsRecurring(checked === true)}
                 />
                 <Label htmlFor="recurring" className="flex items-center gap-2">
                   <IconRepeat className="h-4 w-4" />

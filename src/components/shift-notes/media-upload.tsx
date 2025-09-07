@@ -126,7 +126,7 @@ export function MediaUpload({
     newFiles.forEach(mediaFile => {
       simulateUpload(mediaFile.id)
     })
-  }, [simulateUpload, validateFileSize, validateFileType, maxFileSize, maxFiles, mediaFiles.length])
+  }, [])
 
   // Simulate file upload with progress
   const simulateUpload = async (fileId: string) => {

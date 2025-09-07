@@ -291,7 +291,7 @@ export function ActivityCalendarView({ onEditSchedule, onSelectSchedule }: Activ
           components={{
             event: EventComponent,
           }}
-          eventPropGetter={(event) => {
+          eventPropGetter={(event: any) => {
             const schedule = event.resource
             const isOverdue = schedule.scheduledEndTime < Date.now() && schedule.status === 'scheduled'
             

@@ -11,6 +11,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
+import { Id } from "../../../../convex/_generated/dataModel"
 import { Roles, ApprovalStatus } from "../../../../types/globals"
 import { UserProfile } from "../../../../types/user-profile"
 import { 
@@ -127,7 +128,7 @@ export default function AdminDashboard() {
       }
       
       await bulkUpdateUsers({
-        userIds: userIds as string[],
+        userIds: userIds as any,
         updates: bulkUpdates
       })
       
@@ -142,7 +143,7 @@ export default function AdminDashboard() {
   const handleUserProfileUpdate = async (updatedUser: UserProfile) => {
     try {
       await updateUser({
-        userId: updatedUser._id as string,
+        userId: updatedUser._id as any,
         updates: {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
@@ -188,14 +189,14 @@ export default function AdminDashboard() {
     // Apply role filters
     if (filters.roles && filters.roles.length > 0) {
       filtered = filtered.filter(user => 
-        user.role && filters.roles.includes(user.role)
+        user.role && filters.roles?.includes(user.role)
       )
     }
     
     // Apply status filters
     if (filters.approvalStatuses && filters.approvalStatuses.length > 0) {
       filtered = filtered.filter(user => 
-        filters.approvalStatuses.includes(user.approvalStatus || 'pending')
+        filters.approvalStatuses?.includes(user.approvalStatus || 'pending')
       )
     }
     
@@ -220,7 +221,7 @@ export default function AdminDashboard() {
     // Apply certifications filter
     if (filters.certifications && filters.certifications.length > 0) {
       filtered = filtered.filter(user => 
-        user.certifications && filters.certifications.some((cert: string) => 
+        user.certifications && filters.certifications?.some((cert: string) => 
           user.certifications?.includes(cert)
         )
       )
@@ -296,8 +297,15 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center space-x-2">
           <BulkUserOperations 
-            selectedUsers={selectedUsers}
-            onBulkUpdate={handleBulkUpdate}
+            selectedUsers={selectedUsers.map(user => ({
+              id: user._id,
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              role: user.role || null,
+              approvalStatus: user.approvalStatus || 'pending'
+            }))}
+            onBulkUpdate={(userIds: string[], updates: any) => handleBulkUpdate(userIds, updates)}
             onClearSelection={() => setSelectedUsers([])}
           />
           <Button onClick={() => window.location.reload()} disabled={isLoading}>

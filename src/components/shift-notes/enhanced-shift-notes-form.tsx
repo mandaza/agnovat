@@ -238,7 +238,7 @@ export function EnhancedShiftNotesForm({
       const newMap = new Map(prev)
       if (completed) {
         newMap.set(activityId, {
-          scheduleId: activityId, // Using activityId as scheduleId for consistency
+          scheduleId: activityId as any, // Using activityId as scheduleId for consistency
           completed: true,
           status: "completed",
           notes: "",
@@ -350,10 +350,11 @@ export function EnhancedShiftNotesForm({
         challenges: data.challenges || undefined,
         skillsPracticed: data.skillsPracticed,
         generalNotes: data.generalNotes || undefined,
+        status: "draft" as const,
       }
 
       const result = await createShiftNote(shiftNoteData)
-      onShiftNoteCreated?.(result._id)
+      onShiftNoteCreated?.(result)
       onClose()
     } catch (error) {
       console.error('Error creating shift note:', error)

@@ -170,21 +170,18 @@ export function ClientsTable({ onClientUpdated }: ClientsTableProps) {
         <div className="flex gap-2">
           <Button 
             variant={statusFilter === "all" ? "default" : "outline"}
-            size="sm"
             onClick={() => setStatusFilter("all")}
           >
             All
           </Button>
           <Button 
             variant={statusFilter === "active" ? "default" : "outline"}
-            size="sm"
             onClick={() => setStatusFilter("active")}
           >
             Active
           </Button>
           <Button 
             variant={statusFilter === "inactive" ? "default" : "outline"}
-            size="sm"
             onClick={() => setStatusFilter("inactive")}
           >
             Inactive
@@ -259,7 +256,6 @@ export function ClientsTable({ onClientUpdated }: ClientsTableProps) {
                         <Switch
                           checked={client.isActive}
                           onCheckedChange={() => handleToggleStatus(client)}
-                          size="sm"
                         />
                       </div>
                     </TableCell>
@@ -270,21 +266,19 @@ export function ClientsTable({ onClientUpdated }: ClientsTableProps) {
                       <div className="flex items-center justify-end gap-2">
                         <Button 
                           variant="ghost" 
-                          size="sm"
-                          onClick={() => handleViewClient(client)}
+                                        onClick={() => handleViewClient(client)}
                         >
                           <IconEye className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEditClient(client)}
+                                        onClick={() => handleEditClient(client)}
                         >
                           <IconEdit className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
-                          size="sm" 
+ 
                           className="text-destructive hover:text-destructive"
                           onClick={() => handleDeleteClient(client)}
                         >

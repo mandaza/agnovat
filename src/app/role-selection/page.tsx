@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
-import { useAuth } from "@clerk/nextjs"
+import { useUser } from "@clerk/nextjs"
 import { Roles } from "../../../types/globals"
 import { 
   Users, 
@@ -70,7 +70,7 @@ const roleOptions: Array<{
 export default function RoleSelectionPage() {
   const [selectedRole, setSelectedRole] = useState<Roles | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { user } = useAuth()
+  const { user } = useUser()
 
   const handleRoleSelection = async () => {
     if (!selectedRole) return

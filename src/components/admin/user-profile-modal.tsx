@@ -50,7 +50,7 @@ export function UserProfileModal({ user, onUpdate, trigger }: UserProfileModalPr
     setIsLoading(true)
     try {
       await updateUser({
-        userId: user._id,
+        userId: user._id as any,
         updates: {
           email: editedUser.email,
           firstName: editedUser.firstName,
