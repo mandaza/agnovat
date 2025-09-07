@@ -114,14 +114,15 @@ export const getUsers = query({
     includeInactive: v.optional(v.boolean())
   },
   handler: async (ctx, args) => {
-    let query = ctx.db.query("users");
-    
     // Apply filters
+    let users;
     if (args.role) {
-      query = query.withIndex("by_role", (q) => q.eq("role", args.role!));
+      users = await ctx.db.query("users")
+        .withIndex("by_role", (q) => q.eq("role", args.role!))
+        .collect();
+    } else {
+      users = await ctx.db.query("users").collect();
     }
-    
-    let users = await query.collect();
     
     // Filter by approval status
     if (args.approvalStatus) {
@@ -312,10 +313,7 @@ export const bulkUpdateUsers = mutation({
         updatedAt: now,
       };
       
-      // Add approvedAt timestamp if approving users
-      if (args.updates.approvalStatus === "approved") {
-        updates.approvedAt = now;
-      }
+      // Note: approvedAt timestamp is handled by the main updateUser function
       
       await ctx.db.patch(userId, updates);
       const updatedUser = await ctx.db.get(userId);

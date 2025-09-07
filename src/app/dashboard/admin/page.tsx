@@ -68,7 +68,7 @@ export default function AdminDashboard() {
     try {
       const currentUser = sessionClaims?.metadata as { email?: string }
       await updateUser({
-        userId: userId as string,
+        userId: userId as any,
         updates: {
           approvalStatus: 'approved',
           approvedBy: currentUser?.email || userId,
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
     try {
       const currentUser = sessionClaims?.metadata as { email?: string }
       await updateUser({
-        userId: userId as string,
+        userId: userId as any,
         updates: {
           approvalStatus: 'rejected',
           approvedBy: currentUser?.email || userId
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
     setIsLoading(true)
     try {
       await updateUser({
-        userId: userId as string,
+        userId: userId as any,
         updates: { role: newRole }
       })
     } catch (error) {

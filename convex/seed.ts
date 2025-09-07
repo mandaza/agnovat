@@ -79,7 +79,7 @@ export const seedBehaviorChecklist = mutation({
     ];
 
     for (const behavior of behaviors) {
-      await ctx.db.insert("behaviorChecklist", behavior);
+      await ctx.db.insert("behaviorChecklist", behavior as any);
     }
 
     return { message: "Behavior checklist seeded successfully" };
@@ -129,7 +129,7 @@ export const seedInterventionStrategies = mutation({
     ];
 
     for (const strategy of strategies) {
-      await ctx.db.insert("interventionStrategies", strategy);
+      await ctx.db.insert("interventionStrategies", strategy as any);
     }
 
     return { message: "Intervention strategies seeded successfully" };
@@ -141,13 +141,13 @@ export const seedGoals = mutation({
   args: {},
   handler: async (ctx) => {
     // First, create a sample user if none exists
-    let userId = await ctx.db
+    let user = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", "admin@agnovat.com"))
       .first();
     
-    if (!userId) {
-      userId = await ctx.db.insert("users", {
+    if (!user) {
+      const userId = await ctx.db.insert("users", {
         clerkId: "sample_clerk_id",
         email: "admin@agnovat.com",
         firstName: "Admin",
@@ -157,6 +157,7 @@ export const seedGoals = mutation({
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
+      user = await ctx.db.get(userId);
     }
 
     // Create sample goals
@@ -170,7 +171,7 @@ export const seedGoals = mutation({
         targetDate: new Date("2024-12-31").getTime(),
         status: "active" as const,
         progress: 65,
-        createdBy: userId._id,
+        createdBy: user!._id,
         assignedTo: undefined,
         createdAt: Date.now() - 30 * 24 * 60 * 60 * 1000, // 30 days ago
         updatedAt: Date.now() - 5 * 24 * 60 * 60 * 1000, // 5 days ago
@@ -184,7 +185,7 @@ export const seedGoals = mutation({
         targetDate: new Date("2024-10-31").getTime(),
         status: "active" as const,
         progress: 40,
-        createdBy: userId._id,
+        createdBy: user!._id,
         assignedTo: undefined,
         createdAt: Date.now() - 20 * 24 * 60 * 60 * 1000, // 20 days ago
         updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2 days ago
@@ -198,7 +199,7 @@ export const seedGoals = mutation({
         targetDate: new Date("2025-06-30").getTime(),
         status: "completed" as const,
         progress: 100,
-        createdBy: userId._id,
+        createdBy: user!._id,
         assignedTo: undefined,
         createdAt: Date.now() - 90 * 24 * 60 * 60 * 1000, // 90 days ago
         updatedAt: Date.now() - 10 * 24 * 60 * 60 * 1000, // 10 days ago
@@ -212,7 +213,7 @@ export const seedGoals = mutation({
         targetDate: new Date("2024-09-15").getTime(),
         status: "paused" as const,
         progress: 25,
-        createdBy: userId._id,
+        createdBy: user!._id,
         assignedTo: undefined,
         createdAt: Date.now() - 45 * 24 * 60 * 60 * 1000, // 45 days ago
         updatedAt: Date.now() - 15 * 24 * 60 * 60 * 1000, // 15 days ago

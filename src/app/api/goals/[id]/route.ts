@@ -8,7 +8,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -20,7 +20,8 @@ export async function PUT(
       )
     }
 
-    const goalId = params.id as Id<"goals">
+    const resolvedParams = await params
+    const goalId = resolvedParams.id as Id<"goals">
     const body = await request.json()
     
     const updatedGoal = await convex.mutation(api.api.updateGoal, {
@@ -53,7 +54,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -65,7 +66,8 @@ export async function DELETE(
       )
     }
 
-    const goalId = params.id as Id<"goals">
+    const resolvedParams = await params
+    const goalId = resolvedParams.id as Id<"goals">
     
     await convex.mutation(api.api.deleteGoal, {
       goalId,

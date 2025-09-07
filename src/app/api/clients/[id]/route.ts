@@ -8,7 +8,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -20,7 +20,8 @@ export async function GET(
       )
     }
 
-    const clientId = params.id as Id<"clients">
+    const resolvedParams = await params
+    const clientId = resolvedParams.id as Id<"clients">
 
     // Fetch specific client from Convex
     const client = await convex.query(api.api.getClientById, { clientId })
@@ -47,7 +48,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -59,7 +60,8 @@ export async function PATCH(
       )
     }
 
-    const clientId = params.id as Id<"clients">
+    const resolvedParams = await params
+    const clientId = resolvedParams.id as Id<"clients">
     const body = await request.json()
 
     // Update client via Convex
@@ -84,7 +86,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -96,7 +98,8 @@ export async function DELETE(
       )
     }
 
-    const clientId = params.id as Id<"clients">
+    const resolvedParams = await params
+    const clientId = resolvedParams.id as Id<"clients">
 
     // Delete client via Convex
     await convex.mutation(api.api.deleteClient, { clientId })
