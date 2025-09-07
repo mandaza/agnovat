@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation } from "convex/react"
 import { api } from "../../convex/_generated/api"
+import { Id } from "../../convex/_generated/dataModel"
 import { 
   ActivityScheduleStatus, 
   SchedulePriority, 
@@ -37,10 +38,10 @@ export interface ActivitySchedule {
 }
 
 export interface ActivityScheduleFilters {
-  activityId?: string
-  goalId?: string
+  activityId?: Id<"activities">
+  goalId?: Id<"goals">
   clientId?: string
-  assignedTo?: string
+  assignedTo?: Id<"users">
   status?: ActivityScheduleStatus
   priority?: SchedulePriority
   startDate?: number
@@ -52,7 +53,7 @@ export interface UpdateActivityScheduleData {
   scheduledDate?: number
   scheduledStartTime?: number
   scheduledEndTime?: number
-  assignedTo?: string
+  assignedTo?: Id<"users">
   priority?: SchedulePriority
   status?: ActivityScheduleStatus
   notes?: string
@@ -62,7 +63,7 @@ export interface RescheduleActivityData {
   newScheduledDate: number
   newScheduledStartTime: number
   newScheduledEndTime: number
-  newAssignedTo?: string
+  newAssignedTo?: Id<"users">
   rescheduleReason?: string
 }
 
@@ -80,17 +81,17 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
   const createSchedule = async (scheduleData: CreateActivityScheduleData) => {
     try {
       const result = await createScheduleMutation({
-        activityId: scheduleData.activityId,
-        goalId: scheduleData.goalId,
+        activityId: scheduleData.activityId as any,
+        goalId: scheduleData.goalId as any,
         clientId: scheduleData.clientId,
         scheduledDate: scheduleData.scheduledDate,
         scheduledStartTime: scheduleData.scheduledStartTime,
         scheduledEndTime: scheduleData.scheduledEndTime,
-        assignedTo: scheduleData.assignedTo,
+        assignedTo: scheduleData.assignedTo as any,
         priority: scheduleData.priority,
         notes: scheduleData.notes,
         recurringPattern: scheduleData.recurringPattern,
-        createdBy: scheduleData.createdBy,
+        createdBy: scheduleData.createdBy as any,
       })
       return result
     } catch (error) {
@@ -118,7 +119,7 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
       }
 
       const result = await updateScheduleMutation({
-        scheduleId: scheduleId,
+        scheduleId: scheduleId as any,
         updates: filteredUpdates,
       })
       return result
@@ -132,11 +133,11 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
   const rescheduleActivity = async (scheduleId: string, rescheduleData: RescheduleActivityData) => {
     try {
       const result = await rescheduleMutation({
-        originalScheduleId: scheduleId ,
+        originalScheduleId: scheduleId as any,
         newScheduledDate: rescheduleData.newScheduledDate,
         newScheduledStartTime: rescheduleData.newScheduledStartTime,
         newScheduledEndTime: rescheduleData.newScheduledEndTime,
-        newAssignedTo: rescheduleData.newAssignedTo ,
+        newAssignedTo: rescheduleData.newAssignedTo as any,
         rescheduleReason: rescheduleData.rescheduleReason,
       })
       return result
@@ -150,7 +151,7 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
   const cancelSchedule = async (scheduleId: string, cancellationReason?: string) => {
     try {
       const result = await cancelScheduleMutation({
-        scheduleId: scheduleId ,
+        scheduleId: scheduleId as any,
         cancellationReason,
       })
       return result
@@ -247,7 +248,7 @@ export function useActivitySchedulesRealtime(filters: ActivityScheduleFilters = 
 
 // Hook for activities (existing activities that can be scheduled)
 export function useActivitiesRealtime(filters: { goalId?: string; frequency?: string } = {}) {
-  const activities = useQuery(api.api.getActivities, filters) || []
+  const activities = useQuery(api.api.getActivities, filters as any) || []
   
   // Mutations for activity management
   const createActivityMutation = useMutation(api.api.createActivity)
@@ -267,10 +268,10 @@ export function useActivitiesRealtime(filters: { goalId?: string; frequency?: st
   }) => {
     try {
       const result = await createActivityMutation({
-        goalId: activityData.goalId ,
+        goalId: activityData.goalId as any,
         title: activityData.title,
         description: activityData.description,
-        frequency: activityData.frequency,
+        frequency: activityData.frequency as any,
         estimatedDuration: activityData.estimatedDuration,
         instructions: activityData.instructions,
         materials: activityData.materials,
@@ -295,12 +296,12 @@ export function useActivitiesRealtime(filters: { goalId?: string; frequency?: st
   }) => {
     try {
       const result = await updateActivityMutation({
-        activityId: activityId ,
+        activityId: activityId as any,
         updates: {
-          goalId: updates.goalId ,
+          goalId: updates.goalId as any,
           title: updates.title,
           description: updates.description,
-          frequency: updates.frequency,
+          frequency: updates.frequency as any,
           estimatedDuration: updates.estimatedDuration,
           instructions: updates.instructions,
           materials: updates.materials,
@@ -318,7 +319,7 @@ export function useActivitiesRealtime(filters: { goalId?: string; frequency?: st
   const deleteActivity = async (activityId: string) => {
     try {
       const result = await deleteActivityMutation({
-        activityId: activityId ,
+        activityId: activityId as any,
       })
       return result
     } catch (error) {
@@ -331,7 +332,7 @@ export function useActivitiesRealtime(filters: { goalId?: string; frequency?: st
   const deactivateActivity = async (activityId: string) => {
     try {
       const result = await deactivateActivityMutation({
-        activityId: activityId ,
+        activityId: activityId as any,
       })
       return result
     } catch (error) {

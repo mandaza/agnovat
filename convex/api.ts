@@ -305,7 +305,7 @@ export const bulkUpdateUsers = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const results = [];
+    const results: any[] = [];
     
     for (const userId of args.userIds) {
       const updates = {
@@ -317,7 +317,7 @@ export const bulkUpdateUsers = mutation({
       
       await ctx.db.patch(userId, updates);
       const updatedUser = await ctx.db.get(userId);
-      results.push(updatedUser);
+      if (updatedUser) results.push(updatedUser);
     }
     
     return results;
@@ -737,7 +737,7 @@ export const createTestGoals = mutation({
       },
     ];
 
-    const goalIds = [];
+    const goalIds: any[] = [];
     for (const goal of testGoals) {
       const goalId = await ctx.db.insert("goals", goal);
       goalIds.push(goalId);
@@ -783,14 +783,14 @@ export const createTestGoals = mutation({
       },
     ];
 
-    const activityIds = [];
+    const activityIds: any[] = [];
     for (const activity of testActivities) {
       const activityId = await ctx.db.insert("activities", activity);
       activityIds.push(activityId);
     }
 
     // Create some scheduled activities for the next few days
-    const schedules = [];
+    const schedules: any[] = [];
     const now = new Date();
     
     for (let dayOffset = 0; dayOffset < 7; dayOffset++) {

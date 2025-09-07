@@ -92,7 +92,7 @@ export function useBehaviorsRealtime(filters: BehaviorFilters = {}) {
   // Real-time query - automatically updates when data changes
   const behaviors = useQuery(api.api.getBehaviors, {
     clientId: filters.clientId,
-    userId: filters.userId,
+    userId: filters.userId as any,
     status: filters.status,
     startDate: filters.startDate,
     endDate: filters.endDate,
