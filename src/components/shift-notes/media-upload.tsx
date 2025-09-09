@@ -66,13 +66,13 @@ export function MediaUpload({
   }
 
   // File size validation
-  const validateFileSize = (file: File): boolean => {
+  const validateFileSize = useCallback((file: File): boolean => {
     const sizeInMB = file.size / (1024 * 1024)
     return sizeInMB <= maxFileSize
-  }
+  }, [maxFileSize])
 
   // File type validation
-  const validateFileType = (file: File): boolean => {
+  const validateFileType = useCallback((file: File): boolean => {
     return acceptedTypes.some(type => {
       if (type.includes('*')) {
         const baseType = type.split('/')[0]
@@ -80,7 +80,7 @@ export function MediaUpload({
       }
       return file.type === type || file.name.toLowerCase().endsWith(type)
     })
-  }
+  }, [acceptedTypes])
 
   // Handle file selection
   const handleFileSelect = useCallback((files: FileList) => {
@@ -126,10 +126,10 @@ export function MediaUpload({
     newFiles.forEach(mediaFile => {
       simulateUpload(mediaFile.id)
     })
-  }, [])
+  }, [maxFileSize, maxFiles, mediaFiles.length, simulateUpload, validateFileSize, validateFileType])
 
   // Simulate file upload with progress
-  const simulateUpload = async (fileId: string) => {
+  const simulateUpload = useCallback(async (fileId: string) => {
     const updateProgress = (progress: number) => {
       setMediaFiles(prev => prev.map(file => 
         file.id === fileId ? { ...file, uploadProgress: progress } : file
@@ -148,7 +148,7 @@ export function MediaUpload({
     ))
 
     onMediaUploaded?.(fileId)
-  }
+  }, [onMediaUploaded])
 
   // Handle drag and drop
   const handleDragOver = useCallback((e: React.DragEvent) => {

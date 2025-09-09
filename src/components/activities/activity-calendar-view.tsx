@@ -63,16 +63,6 @@ export function ActivityCalendarView({ onEditSchedule, onSelectSchedule }: Activ
 
   const isLoading = schedulesLoading || activitiesLoading || goalsLoading
 
-  // Get activity and goal titles
-  const getActivityTitle = (activityId: string) => {
-    const activity = activities.find(a => a._id === activityId)
-    return activity?.title || 'Unknown Activity'
-  }
-
-  const getGoalTitle = (goalId: string) => {
-    const goal = goals.find(g => g._id === goalId)
-    return goal?.title || 'Unknown Goal'
-  }
 
   // Filter schedules based on selected filters
   const filteredSchedules = useMemo(() => {
@@ -98,6 +88,11 @@ export function ActivityCalendarView({ onEditSchedule, onSelectSchedule }: Activ
 
   // Convert schedules to calendar events
   const events: CalendarEvent[] = useMemo(() => {
+    const getActivityTitle = (activityId: string) => {
+      const activity = activities.find(a => a._id === activityId)
+      return activity?.title || 'Unknown Activity'
+    }
+    
     return filteredSchedules.map(schedule => ({
       id: schedule._id,
       title: getActivityTitle(schedule.activityId),
@@ -105,7 +100,7 @@ export function ActivityCalendarView({ onEditSchedule, onSelectSchedule }: Activ
       end: new Date(schedule.scheduledEndTime),
       resource: schedule,
     }))
-  }, [filteredSchedules, getActivityTitle])
+  }, [filteredSchedules, activities])
 
   // Get unique clients and workers for filtering
   const uniqueClients = useMemo(() => {

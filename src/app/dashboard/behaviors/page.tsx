@@ -5,7 +5,6 @@ import {
   IconAlertTriangle, 
   IconShield, 
   IconEye, 
-  IconClock, 
   IconTrendingUp 
 } from "@tabler/icons-react"
 import { BehaviorIncidentForm } from "@/components/behaviors/behavior-incident-form"
@@ -14,7 +13,7 @@ import { useBehaviorsRealtime } from "@/hooks/use-behaviors-realtime"
 import { RoleGuard } from "@/components/role-guard"
 
 export default function BehaviorsPage() {
-  const { analytics, recentIncidents, highIntensityIncidents, isLoading } = useBehaviorsRealtime()
+  const { analytics, recentIncidents, isLoading } = useBehaviorsRealtime()
 
   // Calculate additional metrics
   const recentHighIntensity = recentIncidents.filter(incident => incident.intensity >= 4).length

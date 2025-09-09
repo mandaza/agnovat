@@ -1,6 +1,111 @@
 import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
+
+// Action to sync user data to Clerk (actions can make external API calls)
+export const syncUserToClerk = action({
+  args: {
+    clerkId: v.string(),
+    approvalStatus: v.string(),
+    role: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const response = await fetch(`https://api.clerk.dev/v1/users/${args.clerkId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          public_metadata: {
+            approvalStatus: args.approvalStatus,
+            role: args.role || null,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to sync user to Clerk:', errorText);
+        throw new Error(`Clerk API error: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('Successfully synced user to Clerk:', result.public_metadata);
+      return result;
+    } catch (error) {
+      console.error('Error syncing user to Clerk:', error);
+      throw error;
+    }
+  },
+});
+
+// Test action to verify Clerk API is working
+export const testClerkSync = action({
+  args: {
+    clerkId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    try {
+      // First, let's see what the current user looks like in Clerk
+      const getResponse = await fetch(`https://api.clerk.dev/v1/users/${args.clerkId}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+        },
+      });
+      
+      if (!getResponse.ok) {
+        throw new Error(`Failed to get user: ${await getResponse.text()}`);
+      }
+      
+      const currentUser = await getResponse.json();
+      console.log('Current user in Clerk:', {
+        id: currentUser.id,
+        public_metadata: currentUser.public_metadata,
+        private_metadata: currentUser.private_metadata
+      });
+      
+      // Now try to update the metadata
+      const updateResponse = await fetch(`https://api.clerk.dev/v1/users/${args.clerkId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          public_metadata: {
+            approvalStatus: "approved",
+            role: "admin",
+            testUpdate: new Date().toISOString()
+          },
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        const errorText = await updateResponse.text();
+        throw new Error(`Failed to update user: ${errorText}`);
+      }
+
+      const updatedUser = await updateResponse.json();
+      console.log('Updated user in Clerk:', {
+        id: updatedUser.id,
+        public_metadata: updatedUser.public_metadata,
+        private_metadata: updatedUser.private_metadata
+      });
+      
+      return {
+        success: true,
+        before: currentUser.public_metadata,
+        after: updatedUser.public_metadata
+      };
+    } catch (error) {
+      console.error('Test sync error:', error);
+      throw error;
+    }
+  },
+});
 
 // ===== CLIENT MANAGEMENT =====
 
@@ -202,14 +307,38 @@ export const createUser = mutation({
   },
   handler: async (ctx, args) => {
     const now = Date.now();
-    const userId = await ctx.db.insert("users", {
+    
+    // IMPORTANT: Check if user already exists to prevent duplicates
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .first();
+    
+    if (existingUser) {
+      console.log("User already exists, returning existing user ID:", existingUser._id);
+      return existingUser._id;
+    }
+    
+    // New users start with pending status and no role until approved
+    const userData = {
       ...args,
-      isActive: true,
+      // Remove role assignment - will be set by admin during approval
+      role: undefined,
+      // Set default approval workflow values
+      isActive: false, // Inactive until approved
+      approvalStatus: "pending", // Always pending for new signups
+      requestedAt: now, // When they requested access
+      // Reset admin-controlled fields
+      approvedBy: undefined,
+      approvedAt: undefined,
+      // Standard timestamps
       createdAt: now,
       updatedAt: now,
-      requestedAt: args.requestedAt || now,
-      approvalStatus: args.approvalStatus || "pending",
-    });
+    };
+    
+    console.log("Creating new user for clerkId:", args.clerkId);
+    const userId = await ctx.db.insert("users", userData);
+    console.log("Successfully created user with ID:", userId);
     return userId;
   },
 });
@@ -321,6 +450,289 @@ export const bulkUpdateUsers = mutation({
     }
     
     return results;
+  },
+});
+
+// Direct user creation mutation (used by actions)
+export const createUserDirect = mutation({
+  args: {
+    clerkId: v.string(),
+    email: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
+    role: v.optional(v.union(
+      v.literal("admin"),
+      v.literal("public_guardian"),
+      v.literal("support_worker"),
+      v.literal("behavior_practitioner"),
+      v.literal("family"),
+      v.literal("support_coordinator")
+    )),
+    approvalStatus: v.optional(v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected")
+    )),
+    isActive: v.optional(v.boolean()),
+    approvedAt: v.optional(v.number()),
+    requestedAt: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    
+    const userId = await ctx.db.insert("users", {
+      ...args,
+      createdAt: now,
+      updatedAt: now,
+    });
+    
+    return userId;
+  },
+});
+
+// Create admin user directly (bypasses approval workflow)
+export const createAdminUser = action({
+  args: {
+    clerkId: v.string(),
+    email: v.string(),
+    firstName: v.string(),
+    lastName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    
+    // Check if user already exists
+    const existingUser = await ctx.runQuery(internal.api.getUserByClerkId, { clerkId: args.clerkId });
+    
+    if (existingUser) {
+      // Update existing user to admin
+      await ctx.runMutation(internal.api.updateUser, {
+        userId: existingUser._id,
+        updates: {
+          role: "admin",
+          approvalStatus: "approved",
+          isActive: true,
+          approvedBy: existingUser._id,
+          approvedAt: now,
+        }
+      });
+      
+      // Sync to Clerk metadata
+      await ctx.runAction(internal.api.syncUserToClerk, {
+        clerkId: args.clerkId,
+        approvalStatus: "approved",
+        role: "admin"
+      });
+      
+      return await ctx.runQuery(internal.api.getUserById, { userId: existingUser._id });
+    }
+    
+    // Create new admin user - we need a separate mutation for this
+    const userId = await ctx.runMutation(internal.api.createUserDirect, {
+      clerkId: args.clerkId,
+      email: args.email,
+      firstName: args.firstName,
+      lastName: args.lastName,
+      role: "admin",
+      approvalStatus: "approved",
+      isActive: true,
+      approvedAt: now,
+      requestedAt: now,
+    });
+    
+    // Sync to Clerk metadata
+    await ctx.runAction(internal.api.syncUserToClerk, {
+      clerkId: args.clerkId,
+      approvalStatus: "approved",
+      role: "admin"
+    });
+    
+    return await ctx.runQuery(internal.api.getUserById, { userId });
+  },
+});
+
+// ===== ADMIN USER APPROVAL WORKFLOW =====
+
+// Get pending users for admin approval
+export const getPendingUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_approval_status", (q) => q.eq("approvalStatus", "pending"))
+      .order("desc")
+      .collect();
+  },
+});
+
+// Get users by approval status
+export const getUsersByApprovalStatus = query({
+  args: {
+    status: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected")
+    )
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_approval_status", (q) => q.eq("approvalStatus", args.status))
+      .order("desc")
+      .collect();
+  },
+});
+
+// Approve user and assign role
+export const approveUser = mutation({
+  args: {
+    userId: v.id("users"),
+    assignedRole: v.union(
+      v.literal("admin"),
+      v.literal("public_guardian"),
+      v.literal("support_worker"),
+      v.literal("behavior_practitioner"),
+      v.literal("family"),
+      v.literal("support_coordinator")
+    ),
+    approvedByUserId: v.id("users"), // Admin who is approving
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    
+    // Get user to access clerkId
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Update user with approval
+    await ctx.db.patch(args.userId, {
+      approvalStatus: "approved",
+      role: args.assignedRole,
+      isActive: true, // Activate user
+      approvedBy: args.approvedByUserId,
+      approvedAt: now,
+      updatedAt: now,
+    });
+    
+    // Sync to Clerk metadata
+    await syncUserToClerk(user.clerkId, "approved", args.assignedRole);
+    
+    return await ctx.db.get(args.userId);
+  },
+});
+
+// Reject user
+export const rejectUser = mutation({
+  args: {
+    userId: v.id("users"),
+    rejectedByUserId: v.id("users"), // Admin who is rejecting
+    rejectionReason: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    
+    // Get user to access clerkId
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Update user with rejection
+    await ctx.db.patch(args.userId, {
+      approvalStatus: "rejected",
+      isActive: false,
+      approvedBy: args.rejectedByUserId,
+      approvedAt: now,
+      notes: args.rejectionReason ? `Rejected: ${args.rejectionReason}` : undefined,
+      updatedAt: now,
+    });
+    
+    // Sync to Clerk metadata
+    await syncUserToClerk(user.clerkId, "rejected");
+    
+    return await ctx.db.get(args.userId);
+  },
+});
+
+// Bulk approve users
+export const bulkApproveUsers = mutation({
+  args: {
+    approvals: v.array(v.object({
+      userId: v.id("users"),
+      assignedRole: v.union(
+        v.literal("admin"),
+        v.literal("public_guardian"),
+        v.literal("support_worker"),
+        v.literal("behavior_practitioner"),
+        v.literal("family"),
+        v.literal("support_coordinator")
+      ),
+    })),
+    approvedByUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const results: any[] = [];
+    
+    for (const approval of args.approvals) {
+      // Get user to access clerkId
+      const user = await ctx.db.get(approval.userId);
+      if (!user) {
+        console.error(`User not found: ${approval.userId}`);
+        continue;
+      }
+      
+      await ctx.db.patch(approval.userId, {
+        approvalStatus: "approved",
+        role: approval.assignedRole,
+        isActive: true,
+        approvedBy: args.approvedByUserId,
+        approvedAt: now,
+        updatedAt: now,
+      });
+      
+      // Sync to Clerk metadata
+      await syncUserToClerk(user.clerkId, "approved", approval.assignedRole);
+      
+      const updatedUser = await ctx.db.get(approval.userId);
+      if (updatedUser) results.push(updatedUser);
+    }
+    
+    return results;
+  },
+});
+
+// Reset user to pending status (for re-review)
+export const resetUserToPending = mutation({
+  args: {
+    userId: v.id("users"),
+    resetByUserId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    
+    // Get user to access clerkId
+    const user = await ctx.db.get(args.userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    await ctx.db.patch(args.userId, {
+      approvalStatus: "pending",
+      role: undefined, // Remove role assignment
+      isActive: false, // Deactivate until re-approved
+      approvedBy: undefined,
+      approvedAt: undefined,
+      requestedAt: now, // Update request time
+      updatedAt: now,
+    });
+    
+    // Sync to Clerk metadata
+    await syncUserToClerk(user.clerkId, "pending");
+    
+    return await ctx.db.get(args.userId);
   },
 });
 

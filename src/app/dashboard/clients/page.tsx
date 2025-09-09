@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { IconUsers, IconUserCheck, IconUserX, IconUserPlus, IconCalendar } from "@tabler/icons-react"
+import { IconUsers, IconUserCheck, IconUserX, IconCalendar } from "@tabler/icons-react"
 import { AddClientForm } from "@/components/clients/add-client-form"
 import { ClientsTable } from "@/components/clients/clients-table"
 import { useClientsRealtime } from "@/hooks/use-clients-realtime"

@@ -4,7 +4,6 @@
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { IconPlus, IconNotes, IconClock, IconUser, IconSearch, IconFilter } from "@tabler/icons-react"
 import { ShiftNotesDialog } from "@/components/shift-notes/shift-notes-dialog"
 import { ShiftNotesList } from "@/components/shift-notes/shift-notes-list"
@@ -18,15 +17,11 @@ export default function ShiftNotesPage() {
   
   const { analytics } = useShiftNotesRealtime()
   
-  const handleShiftNoteCreated = (shiftNoteId: Id<"shiftNotes">) => {
+  const handleShiftNoteCreated = () => {
     setIsFormOpen(false)
     setEditingShiftNoteId(undefined)
   }
 
-  const handleCloseForm = () => {
-    setIsFormOpen(false)
-    setEditingShiftNoteId(undefined)
-  }
   return (
     <>
       

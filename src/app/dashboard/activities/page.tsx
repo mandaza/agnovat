@@ -18,12 +18,12 @@ export default function Activities() {
   const [isActivityFormOpen, setIsActivityFormOpen] = useState(false)
   const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null)
 
-  const handleScheduleCreated = (scheduleId: string) => {
+  const handleScheduleCreated = () => {
     setIsSchedulingFormOpen(false)
     // Could show success toast here
   }
 
-  const handleActivityCreated = (activityId: string) => {
+  const handleActivityCreated = () => {
     setIsActivityFormOpen(false)
     // Could show success toast here
   }
@@ -33,7 +33,7 @@ export default function Activities() {
     setIsSchedulingFormOpen(true)
   }
 
-  const handleScheduleActivity = (activityId: string) => {
+  const handleScheduleActivity = () => {
     // Auto-fill the activity when opening schedule form
     setIsSchedulingFormOpen(true)
   }

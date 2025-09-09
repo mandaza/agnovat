@@ -1,13 +1,12 @@
 'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
 import { useUser } from "@clerk/nextjs"
 import { Roles } from "../../../types/globals"
 import { 
-  Users, 
   Shield, 
   Heart, 
   Brain, 

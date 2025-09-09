@@ -11,7 +11,6 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "../../../../convex/_generated/api"
-import { Id } from "../../../../convex/_generated/dataModel"
 import { Roles, ApprovalStatus } from "../../../../types/globals"
 import { UserProfile } from "../../../../types/user-profile"
 import { 
@@ -35,7 +34,7 @@ import { AdvancedUserSearch } from "@/components/admin/advanced-user-search"
 // Using shared UserProfile interface
 
 export default function AdminDashboard() {
-  const { userId, sessionClaims } = useAuth()
+  const { sessionClaims } = useAuth()
   
   // Convex queries and mutations
   const allUsers = useQuery(api.api.getUsers, { includeInactive: true })

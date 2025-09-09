@@ -3,7 +3,6 @@
 import * as React from "react"
 import {
   IconCamera,
-  IconDashboard,
   IconDatabase,
   IconFileAi,
   IconFileDescription,
@@ -38,7 +37,7 @@ import { useAuth } from "@clerk/nextjs"
 import { Roles } from "../../types/globals"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { userId, sessionClaims } = useAuth()
+  const { sessionClaims } = useAuth()
   const userRole = (sessionClaims?.metadata as { role?: string })?.role as Roles
   const isAdmin = userRole === 'admin'
 
@@ -84,7 +83,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // Add admin-specific items
     if (isAdmin) {
       baseItems.unshift({
-        title: "User Management",
+        title: "User Approvals",
+        url: "/dashboard/admin/user-approval",
+        icon: IconUsers,
+        roles: ['admin']
+      })
+      baseItems.unshift({
+        title: "Admin Dashboard",
         url: "/dashboard/admin",
         icon: IconShield,
         roles: ['admin']
